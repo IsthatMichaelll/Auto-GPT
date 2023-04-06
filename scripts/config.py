@@ -1,6 +1,7 @@
 import os
 import openai
 from dotenv import load_dotenv
+import langchain
 # Load environment variables from .env file
 load_dotenv()
 
@@ -28,20 +29,37 @@ class Config(metaclass=Singleton):
         self.continuous_mode = False
         self.speak_mode = False
         # TODO - make these models be self-contained, using langchain, so we can configure them once and call it good 
-        self.fast_llm_model = os.getenv("FAST_LLM_MODEL", "gpt-3.5-turbo") 
-        self.smart_llm_model = os.getenv("SMART_LLM_MODEL", "gpt-4")
-        self.fast_token_limit = int(os.getenv("FAST_TOKEN_LIMIT", 4000))
-        self.smart_token_limit = int(os.getenv("SMART_TOKEN_LIMIT", 8000))
-        
-        self.openai_api_key = os.getenv("OPENAI_API_KEY")
-        self.elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
-        
-        self.google_api_key = os.getenv("GOOGLE_API_KEY")
-        self.custom_search_engine_id = os.getenv("CUSTOM_SEARCH_ENGINE_ID")
+config = langchain.Config()
 
-        # Initialize the OpenAI API client
-        openai.api_key = self.openai_api_key
+config.add_param("fast_llm_model", "gpt-3.5-turbo")
+config.add_param("smart_llm_model", "gpt-4")
+config.add_param("fast_token_limit", 4000)
+config.add_param("smart_token_limit", 8000)
+config.add_param("openai_api_key")
+config.add_param("elevenlabs_api_key")
+config.add_param("google_api_key")
+config.add_param("custom_search_engine_id")
 
+# Initialize the OpenAI API client
+openai.api_key = config.openai_api_key
+
+config.set_env()
+
+class selfcon:
+    def __init__(self):
+        self.fast_llm_model = config.fast_llm_model 
+        self.smart_llm_model = config.smart_llm_model
+        self.fast_token_limit = config.fast_token_limit
+        self.smart_token_limit = config.smart_token_limit
+        self.openai_api_key = config.openai_api_key
+        self.elevenlabs_api_key = config.elevenlabs_api_key
+        self.google_api_key = config.google_api_key
+        self.custom_search_engine_id = config.custom_search_engine_id
+        self.continuous_mode = False
+        self.speak_mode = False
+        
+#Should be self-containted and config once and done
+        
     def set_continuous_mode(self, value: bool):
         self.continuous_mode = value
 
